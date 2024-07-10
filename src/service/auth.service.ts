@@ -2,9 +2,15 @@ import bcrypt from "bcrypt";
 
 import { User } from "../interfaces/user.interfaces";
 import { getUserByEmail } from "../model/user.model";
-import { sign } from "jsonwebtoken";
+import { JwtPayload, sign, verify } from "jsonwebtoken";
 import config from "../config";
+import { error } from "console";
 
+/**
+ * The function `login` hverify credentials and generate access and refresh tokens upon successful login.
+ * @param body - Users credentials
+ * @returns Return an error message if the email or password is invalid. Otherwise, it will generate an access token and a refresh token.
+ */
 export async function login(body: Pick<User, "email" | "password">) {
   const existingUser = getUserByEmail(body.email);
   if (!existingUser) {
@@ -33,6 +39,7 @@ export async function login(body: Pick<User, "email" | "password">) {
   const acessToken = sign(payload, config.jwt.secret!, {
     expiresIn: config.jwt.accessTokenExpiryMS,
   });
+
   const refreshToken = sign(payload, config.jwt.secret!, {
     expiresIn: config.jwt.refreshTokenExpiryMS,
   });
@@ -40,5 +47,38 @@ export async function login(body: Pick<User, "email" | "password">) {
   return {
     acessToken,
     refreshToken,
+  };
+}
+
+/**
+ * The function refreshToken takes an old refresh token, verifies it, and generates a new access token if the old refresh token is valid.
+ * @param {string} oldRefreshToken - OldRefreshToken
+ * @returns Return an error message if the refresh token is invalid. Otherwise, it will generate a new access token.
+ */
+export function refreshToken(oldRefreshToken: string) {
+  if (!oldRefreshToken) {
+    return {
+      error: "Refresh token is required",
+    };
+  }
+
+  const payload = verify(oldRefreshToken, config.jwt.secret!) as JwtPayload;
+
+  if (!payload || !payload.id || !payload.email || !payload.name) {
+    return { error: "Invalid refresh token" };
+  }
+
+  const newPayload: Pick<User, "id" | "name" | "email"> = {
+    id: payload.id,
+    name: payload.name,
+    email: payload.email,
+  };
+
+  const accessToken = sign(newPayload, config.jwt.secret!, {
+    expiresIn: config.jwt.accessTokenExpiryMS,
+  });
+
+  return {
+    accessToken,
   };
 }

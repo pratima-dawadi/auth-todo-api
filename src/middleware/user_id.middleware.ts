@@ -8,6 +8,13 @@ declare module "express-serve-static-core" {
   }
 }
 
+/**
+ * The function `authenticateToken` checks for the presence of an authorization token in the request
+ * @param {Request} req - Request object
+ * @param {Response} res - Response object
+ * @param {NextFunction} next - Callback Function
+ * @returns Return an error message if the token is invalid or missing. Otherwise, it will call the next middleware.
+ */
 export function authenticateToken(
   req: Request,
   res: Response,
