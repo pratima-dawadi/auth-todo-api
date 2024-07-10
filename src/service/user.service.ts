@@ -48,3 +48,13 @@ export function getUserByEmail(email: string) {
   const data = UserModel.getUserByEmail(email);
   return data;
 }
+
+export function updateUser(id: string, body: User) {
+  const data = UserModel.updateUser(id, body);
+  return data;
+}
+
+export function deleteUser(id: string) {
+  const data = UserModel.deleteUser(id);
+  return data;
+}

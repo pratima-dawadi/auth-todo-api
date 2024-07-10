@@ -55,3 +55,16 @@ export async function createUser(req: Request, res: Response) {
   const data = await UserService.createUser(body);
   res.json(data);
 }
+
+export function updateUser(req: Request, res: Response) {
+  const { id } = req.params;
+  const { body } = req;
+  const data = UserService.updateUser(id, body);
+  res.send(`Updated user: ${JSON.stringify(data)}`);
+}
+
+export function deleteUser(req: Request, res: Response) {
+  const { id } = req.params;
+  const data = UserService.deleteUser(id);
+  res.send(`Deleted user: ${JSON.stringify(data)}`);
+}

@@ -1,6 +1,14 @@
 import { getUserQuery, User } from "../interfaces/user.interfaces";
 
-const users: User[] = [];
+const users: User[] = [
+  {
+    name: "abcd",
+    email: "abcd@gmail.com",
+    password: "$2b$10$sGjlIiRRwWY7B.0zietgNuY194/lo61u42U/CGyZr66sUS16wgr5m",
+    permission: ["admin"],
+    id: "1",
+  },
+];
 
 /**
  * The function `getUserById` retrieves a user object from an array based on the provided user ID.
@@ -19,6 +27,7 @@ export function getUserById(id: string) {
 export function createUser(user: User) {
   return users.push({
     ...user,
+    permission: ["user"],
     id: `${users.length + 1}`,
   });
 }
@@ -43,4 +52,24 @@ export function getUsers(query: getUserQuery) {
  */
 export function getUserByEmail(email: string) {
   return users.find(({ email: userEmail }) => userEmail === email);
+}
+
+export function updateUser(id: string, body: User) {
+  const userIndex = users.findIndex(({ id: userId }) => userId === id);
+  if (userIndex === -1) {
+    return { error: "User not found" };
+  }
+  users[userIndex] = {
+    ...users[userIndex],
+    ...body,
+  };
+  return users[userIndex];
+}
+
+export function deleteUser(id: string) {
+  const userIndex = users.findIndex(({ id: userId }) => userId === id);
+  if (userIndex === -1) {
+    return { error: "User not found" };
+  } 
+  return users.splice(userIndex, 1);
 }

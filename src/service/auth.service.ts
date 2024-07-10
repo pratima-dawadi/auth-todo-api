@@ -5,6 +5,7 @@ import { getUserByEmail } from "../model/user.model";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import config from "../config";
 import { error } from "console";
+import { permission } from "process";
 
 /**
  * The function `login` hverify credentials and generate access and refresh tokens upon successful login.
@@ -34,6 +35,7 @@ export async function login(body: Pick<User, "email" | "password">) {
     id: existingUser.id,
     name: existingUser.name,
     email: existingUser.email,
+    permission: existingUser.permission,
   };
 
   const acessToken = sign(payload, config.jwt.secret!, {

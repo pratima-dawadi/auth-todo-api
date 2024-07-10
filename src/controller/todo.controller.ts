@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { Request } from "../interfaces/auth.interfaces";
 import { listTodos } from "../model/todo.model";
 
 import {
@@ -14,7 +15,7 @@ import {
  * @param {Response} res - Response object
  */
 export function getTodos(req: Request, res: Response) {
-  const user_id = req.user_id!;
+  const user_id = req.user!.id;
   const data = listTodos(user_id);
   res.json(data);
 }
@@ -26,7 +27,7 @@ export function getTodos(req: Request, res: Response) {
  */
 export function getTodosById(req: Request, res: Response) {
   const { id } = req.params;
-  const user_id = req.user_id!;
+  const user_id = req.user!.id;
   const data = checkId(id, user_id);
   res.json(data);
 }
@@ -42,7 +43,7 @@ export function postTodos(req: Request, res: Response) {
   if (!body.name || !body.description || !body.status) {
     return res.status(400).json({ error: "Missing required fields" });
   }
-  const user_id = req.user_id!;
+  const user_id = req.user!.id;
   createTodos(body, user_id);
   res.json(body);
 }
@@ -56,7 +57,7 @@ export function postTodos(req: Request, res: Response) {
 export function putTodos(req: Request, res: Response) {
   const id = req.params.id;
   const { body } = req;
-  const user_id = req.user_id!;
+  const user_id = req.user!.id;
   const updatedData = updateTodos(id, body, user_id);
 
   if (updatedData.hasOwnProperty("error")) {
@@ -74,7 +75,7 @@ export function putTodos(req: Request, res: Response) {
  */
 export function deleteTodos(req: Request, res: Response) {
   const { id } = req.params;
-  const user_id = req.user_id!;
+  const user_id = req.user!.id;
   const deletedTodo = removeTodos(Number(id), user_id);
 
   if (deletedTodo.hasOwnProperty("error")) {

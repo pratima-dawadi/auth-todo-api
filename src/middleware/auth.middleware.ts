@@ -1,6 +1,8 @@
 import { JwtPayload, verify } from "jsonwebtoken";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
+import { Request } from "../interfaces/auth.interfaces";
 import config from "../config";
+import { User } from "../interfaces/user.interfaces";
 
 /**
  * The function `auth` checks for a valid Bearer token in the request headers for authentication.
@@ -9,7 +11,7 @@ import config from "../config";
  * @param {NextFunction} next - Callback Function
  * @returns Return an error message if the token is invalid or missing. Otherwise, it will call the next middleware.
  */
-export function auth(req: Request, res: Response, next: NextFunction) {
+export function authenticate(req: Request, res: Response, next: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {
@@ -26,9 +28,20 @@ export function auth(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const details = verify(token[1], config.jwt.secret!);
+    const user = verify(token[1], config.jwt.secret!) as User;
+    req.user = user;
     next();
   } catch (error) {
     next(new Error("Unauthorized"));
   }
+}
+
+export function authorize(permissions: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user!;
+    if (!user.permission.includes(permissions)) {
+      next(new Error("Unauthorized"));
+    }
+    next();
+  };
 }
