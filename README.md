@@ -7,7 +7,7 @@
 
 ### Users
 - `GET /users`: Get the list of the users
-- `GET /users/{id}`: Get the list of the users
+- `GET /users/{id}`: Get the list of the users by ID
 - `POST /users`: Add new user
 
 
