@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
 import { listTodos } from "../model/todo.model";
 import loggerWithNameSpace from "../utils/logger";
@@ -12,16 +12,25 @@ import {
   updateTodos,
 } from "../service/todo.service";
 import { log } from "console";
+import { BadRequestError } from "../error/BadRequestError";
+import { ForbiddenError } from "../error/ForbiddenError";
 
 /**
  * Get all todos.
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getTodos(req: Request, res: Response) {
-  const user_id = req.user!.id;
-  const data = listTodos(user_id);
-  res.json(data);
+export function getTodos(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user_id = req.user!.id;
+    const data = listTodos(user_id);
+    if (!data) {
+      throw new BadRequestError("No todos found for this user");
+    }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**
@@ -29,12 +38,19 @@ export function getTodos(req: Request, res: Response) {
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getTodosById(req: Request, res: Response) {
-  const { id } = req.params;
-  const user_id = req.user!.id;
-  const data = checkId(id, user_id);
-  logger.info(`User ${user_id} requested todo with id ${id}`);
-  res.json(data);
+export function getTodosById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const user_id = req.user!.id;
+    const data = checkId(id, user_id);
+    if (!data) {
+      throw new BadRequestError(`Todo with id ${id} not found`);
+    }
+    logger.info(`User ${user_id} requested todo with id ${id}`);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**
@@ -43,15 +59,23 @@ export function getTodosById(req: Request, res: Response) {
  * @param {Response} res - Response object
  * @returns Return an error message id required fields are missing. Otherwise, it will create a new todo using the provided data, and return Json Response.
  */
-export function postTodos(req: Request, res: Response) {
-  const { body } = req;
-  if (!body.name || !body.description || !body.status) {
-    return res.status(400).json({ error: "Missing required fields" });
+export function postTodos(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { body } = req;
+    if (!body.name || !body.description || !body.status) {
+      throw new BadRequestError("Missing required fields");
+    }
+    const user_id = req.user!.id;
+    const data = createTodos(body, user_id);
+    if (!data) {
+      throw new ForbiddenError("Task cannot be created");
+    }
+    logger.info(`User ${user_id} created a new todo ${body.name}`);
+
+    res.json(body);
+  } catch (error) {
+    next(error);
   }
-  const user_id = req.user!.id;
-  createTodos(body, user_id);
-  logger.info(`User ${user_id} created a new todo ${body.name}`);
-  res.json(body);
 }
 
 /**
@@ -60,18 +84,21 @@ export function postTodos(req: Request, res: Response) {
  * @param {Response} res - Response object
  * @returns Return an error message if the todo item is not found. Otherwise, it will update the todo item with the provided data and return a Json Response.
  */
-export function putTodos(req: Request, res: Response) {
-  const id = req.params.id;
-  const { body } = req;
-  const user_id = req.user!.id;
-  const updatedData = updateTodos(id, body, user_id);
-  
-  if (updatedData.hasOwnProperty("error")) {
-    return res.status(404).json(updatedData);
+export function putTodos(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id;
+    const { body } = req;
+    const user_id = req.user!.id;
+    const updatedData = updateTodos(id, body, user_id);
+    if (!updatedData) {
+      throw new BadRequestError(`Todo with id ${id} not found`);
+    }
+
+    logger.info(`User ${user_id} updated todo of id ${id}`);
+    res.send(`Updated todo: ${JSON.stringify(body)}`);
+  } catch (error) {
+    next(error);
   }
-  
-  logger.info(`User ${user_id} updated todo of id ${id}`);
-  res.send(`Updated todo: ${JSON.stringify(body)}`);
 }
 
 /**
@@ -80,15 +107,18 @@ export function putTodos(req: Request, res: Response) {
  * @param {Response} res - Response object
  * @returns Return an error message if the todo item is not found. Otherwise, it will delete the todo item and return a Json Response.
  */
-export function deleteTodos(req: Request, res: Response) {
-  const { id } = req.params;
-  const user_id = req.user!.id;
-  const deletedTodo = removeTodos(Number(id), user_id);
-  
-  if (deletedTodo.hasOwnProperty("error")) {
-    return res.status(404).json(deletedTodo);
+export function deleteTodos(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const user_id = req.user!.id;
+    const deletedTodo = removeTodos(Number(id), user_id);
+    if (!deletedTodo) {
+      throw new BadRequestError(`Todo with id ${id} not found`);
+    }
+
+    logger.info(`User ${user_id} deleted todo of id ${id}`);
+    res.send(`Deleted todo: ${JSON.stringify(deletedTodo)}`);
+  } catch (error) {
+    next(error);
   }
-  
-  logger.info(`User ${user_id} deleted todo of id ${id}`);
-  res.send(`Deleted todo: ${JSON.stringify(deletedTodo)}`);
 }

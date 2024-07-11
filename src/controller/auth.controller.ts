@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as AuthService from "../service/auth.service";
 import loggerWithNameSpace from "../utils/logger";
 import { ForbiddenError } from "../error/ForbiddenError";
@@ -11,14 +11,15 @@ const logger = loggerWithNameSpace("AuthController");
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  */
-export async function login(req: Request, res: Response) {
+export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { body } = req;
     const data = await AuthService.login(body);
     logger.info(`User login attempt for ${body.email}`);
+    if (!data) throw new BadRequestError("Invalid email or password");
     res.json(data);
   } catch (error) {
-    res.status(400).json(new BadRequestError("Invalid email or password"));
+    next(error);
   }
 }
 
@@ -27,18 +28,25 @@ export async function login(req: Request, res: Response) {
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export async function refreshToken(req: Request, res: Response) {
+export async function refreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json(new BadRequestError("Missing refresh token"));
+      throw new BadRequestError("Missing refresh token");
     }
     const data = await AuthService.refreshToken(refreshToken);
     logger.info(`Refresh token request for ${refreshToken}`);
+    if (!data) {
+      throw new ForbiddenError("Invalid refresh token");
+    }
 
     res.json(data);
   } catch (error) {
-    res.status(400).json(new BadRequestError("Invalid refresh token"));
+    next(error);
   }
 }

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as UserService from "../service/user.service";
 import { getUserQuery } from "../interfaces/user.interfaces";
 import loggerWithNameSpace from "../utils/logger";
@@ -26,10 +26,17 @@ export function getUsers(
  * @param {Response} res - Response object
  * @returns Return a user object if found
  */
-export function getUserById(req: Request, res: Response) {
-  const { id } = req.params;
-  const data = UserService.getUserById(id);
-  res.json(data);
+export function getUserById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const data = UserService.getUserById(id);
+    if (data.hasOwnProperty("error")) {
+      throw new BadRequestError("User not found");
+    }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**
@@ -38,7 +45,11 @@ export function getUserById(req: Request, res: Response) {
  * @param {Response} res - Response object
  * @returns  Return an error message if required fields are missing. Otherwise, it will create a new user using the provided data, and return a Json Response.
  */
-export async function createUser(req: Request, res: Response) {
+export async function createUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { body } = req;
 
@@ -55,26 +66,35 @@ export async function createUser(req: Request, res: Response) {
     logger.info(`User created with email ${body.email}`);
     res.json(data);
   } catch (error) {
-    logger.info(`User created with email ${error}`);
-    if (error instanceof BadRequestError) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "Internal server error" });
-    }
+    next(error);
   }
 }
 
-export function updateUser(req: Request, res: Response) {
-  const { id } = req.params;
-  const { body } = req;
-  const data = UserService.updateUser(id, body);
-  logger.info(`User updated with id ${id}`);
-  res.send(`Updated user: ${JSON.stringify(data)}`);
+export function updateUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const { body } = req;
+    const data = UserService.updateUser(id, body);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    logger.info(`User updated with id ${id}`);
+    res.send(`Updated user: ${JSON.stringify(data)}`);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export function deleteUser(req: Request, res: Response) {
-  const { id } = req.params;
-  const data = UserService.deleteUser(id);
-  logger.info(`User deleted with id ${id}`);
-  res.send(`Deleted user: ${JSON.stringify(data)}`);
+export function deleteUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const data = UserService.deleteUser(id);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    logger.info(`User deleted with id ${id}`);
+    res.send(`Deleted user: ${JSON.stringify(data)}`);
+  } catch (error) {
+    next(error);
+  }
 }

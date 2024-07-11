@@ -1,5 +1,7 @@
 import { getUserQuery, User } from "../interfaces/user.interfaces";
 import * as UserModel from "../model/user.model";
+import { BadRequestError } from "../error/BadRequestError";
+import { ForbiddenError } from "../error/ForbiddenError";
 import bcrypt from "bcrypt";
 
 /**
@@ -11,9 +13,7 @@ export function getUserById(id: string) {
   const data = UserModel.getUserById(id);
 
   if (!data) {
-    return {
-      error: `User with id ${id} not found`,
-    };
+    throw new BadRequestError("User not found");
   }
   return data;
 }

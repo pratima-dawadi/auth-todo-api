@@ -1,3 +1,4 @@
+import { ForbiddenError } from "../error/ForbiddenError";
 import { ITodos } from "../interfaces/todo.interfaces";
 import { getIdFromModel } from "../model/todo.model";
 import * as TodoModel from "../model/todo.model";
@@ -12,9 +13,7 @@ export function checkId(id: string, user_id: string) {
   const todoId = getIdFromModel(id, user_id);
 
   if (!todoId) {
-    return {
-      error: `Todo with id ${id} not found`,
-    };
+    throw new ForbiddenError(`Todo with id ${id} not found`);
   }
 
   return todoId;
@@ -26,7 +25,8 @@ export function checkId(id: string, user_id: string) {
  * @param {string} user_id - User id
  */
 export function createTodos(body: ITodos, user_id: string) {
-  TodoModel.createTodos(body, user_id);
+  const createTodo = TodoModel.createTodos(body, user_id);
+  return createTodo;
 }
 
 /**
@@ -39,7 +39,7 @@ export function createTodos(body: ITodos, user_id: string) {
 export function updateTodos(id: string, body: ITodos, user_id: string) {
   const updatedToDo = TodoModel.updateTodos(Number(id), body, user_id);
   if (updatedToDo.hasOwnProperty("error")) {
-    return { error: "Task does not belong to the user or is invalid" };
+    throw new ForbiddenError("Task cannot be updated");
   }
   return updatedToDo;
 }
@@ -53,7 +53,7 @@ export function updateTodos(id: string, body: ITodos, user_id: string) {
 export function removeTodos(id: number, user_id: string) {
   const deletedTodo = TodoModel.deleteTodo(id, user_id);
   if (deletedTodo.hasOwnProperty("error")) {
-    return { error: "Task does not belong to the user or is invalid" };
+    throw new ForbiddenError("Task does not belong to the user or is invalid");
   }
   return deletedTodo;
 }
