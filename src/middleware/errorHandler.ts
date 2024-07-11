@@ -2,6 +2,8 @@ import { NextFunction, Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
 import HTTPStatusCodes from "http-status-codes";
 import { UnauthenthicatedError } from "../error/UnauthenticatedError";
+import { BadRequestError } from "../error/BadRequestError";
+import { ForbiddenError } from "../error/ForbiddenError";
 
 import loggerWithNameSpace from "../utils/logger";
 
@@ -25,6 +27,18 @@ export function genericErrorHandler(
 
   if (error instanceof UnauthenthicatedError) {
     return res.status(HTTPStatusCodes.UNAUTHORIZED).json({
+      message: error.message,
+    });
+  }
+
+  if (error instanceof BadRequestError) {
+    return res.status(HTTPStatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+
+  if (error instanceof ForbiddenError) {
+    return res.status(HTTPStatusCodes.FORBIDDEN).json({
       message: error.message,
     });
   }
