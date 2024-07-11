@@ -3,6 +3,7 @@ import { NextFunction, Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
 import config from "../config";
 import { User } from "../interfaces/user.interfaces";
+import { UnauthenthicatedError } from "../error/UnauthenticatedError";
 
 /**
  * The function `auth` checks for a valid Bearer token in the request headers for authentication.
@@ -15,14 +16,14 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    next(new Error("Unauthorized"));
+    next(new UnauthenthicatedError("Unauthorized"));
     return;
   }
 
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    next(new Error("Unauthorized"));
+    next(new UnauthenthicatedError("Token not found"));
 
     return;
   }
@@ -32,7 +33,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     req.user = user;
     next();
   } catch (error) {
-    next(new Error("Unauthorized"));
+    next(new UnauthenthicatedError("Token not valid"));
   }
 }
 
@@ -40,7 +41,7 @@ export function authorize(permissions: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = req.user!;
     if (!user.permission.includes(permissions)) {
-      next(new Error("Unauthorized"));
+      next(new UnauthenthicatedError("Permission denied"));
     }
     next();
   };

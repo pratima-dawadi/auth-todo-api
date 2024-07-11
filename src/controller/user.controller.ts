@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import * as UserService from "../service/user.service";
 import { getUserQuery } from "../interfaces/user.interfaces";
+import loggerWithNameSpace from "../utils/logger";
+import { BadRequestError } from "../error/BadRequestError";
+
+const logger = loggerWithNameSpace("UserController");
 
 /**
  * the function `getUsers` retrieves all users.
@@ -35,36 +39,42 @@ export function getUserById(req: Request, res: Response) {
  * @returns  Return an error message if required fields are missing. Otherwise, it will create a new user using the provided data, and return a Json Response.
  */
 export async function createUser(req: Request, res: Response) {
-  const { body } = req;
+  try {
+    const { body } = req;
 
-  if (!body.name || !body.email || !body.password) {
-    res.status(400).json({
-      error: "Missing required fields",
-    });
-    return;
+    if (!body.name || !body.email || !body.password) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const userExists = UserService.getUserByEmail(body.email);
+    if (userExists) {
+      throw new BadRequestError("User already exists");
+    }
+
+    const data = await UserService.createUser(body);
+    logger.info(`User created with email ${body.email}`);
+    res.json(data);
+  } catch (error) {
+    logger.info(`User created with email ${error}`);
+    if (error instanceof BadRequestError) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-
-  const userExists = UserService.getUserByEmail(body.email);
-  if (userExists) {
-    res.status(400).json({
-      error: "User with email already exists",
-    });
-    return;
-  }
-
-  const data = await UserService.createUser(body);
-  res.json(data);
 }
 
 export function updateUser(req: Request, res: Response) {
   const { id } = req.params;
   const { body } = req;
   const data = UserService.updateUser(id, body);
+  logger.info(`User updated with id ${id}`);
   res.send(`Updated user: ${JSON.stringify(data)}`);
 }
 
 export function deleteUser(req: Request, res: Response) {
   const { id } = req.params;
   const data = UserService.deleteUser(id);
+  logger.info(`User deleted with id ${id}`);
   res.send(`Deleted user: ${JSON.stringify(data)}`);
 }

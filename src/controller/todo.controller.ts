@@ -1,6 +1,9 @@
 import { Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
 import { listTodos } from "../model/todo.model";
+import loggerWithNameSpace from "../utils/logger";
+
+const logger = loggerWithNameSpace("TodoController");
 
 import {
   checkId,
@@ -8,6 +11,7 @@ import {
   removeTodos,
   updateTodos,
 } from "../service/todo.service";
+import { log } from "console";
 
 /**
  * Get all todos.
@@ -29,6 +33,7 @@ export function getTodosById(req: Request, res: Response) {
   const { id } = req.params;
   const user_id = req.user!.id;
   const data = checkId(id, user_id);
+  logger.info(`User ${user_id} requested todo with id ${id}`);
   res.json(data);
 }
 
@@ -45,6 +50,7 @@ export function postTodos(req: Request, res: Response) {
   }
   const user_id = req.user!.id;
   createTodos(body, user_id);
+  logger.info(`User ${user_id} created a new todo ${body.name}`);
   res.json(body);
 }
 
@@ -59,11 +65,12 @@ export function putTodos(req: Request, res: Response) {
   const { body } = req;
   const user_id = req.user!.id;
   const updatedData = updateTodos(id, body, user_id);
-
+  
   if (updatedData.hasOwnProperty("error")) {
     return res.status(404).json(updatedData);
   }
-
+  
+  logger.info(`User ${user_id} updated todo of id ${id}`);
   res.send(`Updated todo: ${JSON.stringify(body)}`);
 }
 
@@ -77,10 +84,11 @@ export function deleteTodos(req: Request, res: Response) {
   const { id } = req.params;
   const user_id = req.user!.id;
   const deletedTodo = removeTodos(Number(id), user_id);
-
+  
   if (deletedTodo.hasOwnProperty("error")) {
     return res.status(404).json(deletedTodo);
   }
-
+  
+  logger.info(`User ${user_id} deleted todo of id ${id}`);
   res.send(`Deleted todo: ${JSON.stringify(deletedTodo)}`);
 }
