@@ -98,3 +98,20 @@ export function deleteUser(req: Request, res: Response, next: NextFunction) {
     next(error);
   }
 }
+
+export function getUserByQuery(
+  req: Request<any, any, any, getUserQuery>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { query } = req;
+    const data = UserService.getUserByQuery(query);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+}

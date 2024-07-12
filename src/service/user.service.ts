@@ -58,3 +58,7 @@ export function deleteUser(id: string) {
   const data = UserModel.deleteUser(id);
   return data;
 }
+
+export function getUserByQuery(query: getUserQuery) {
+  return UserModel.getUserByQuery(query);
+}

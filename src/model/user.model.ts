@@ -1,3 +1,4 @@
+import { BadRequestError } from "../error/BadRequestError";
 import { getUserQuery, User } from "../interfaces/user.interfaces";
 
 const users: User[] = [
@@ -69,7 +70,15 @@ export function updateUser(id: string, body: User) {
 export function deleteUser(id: string) {
   const userIndex = users.findIndex(({ id: userId }) => userId === id);
   if (userIndex === -1) {
-    return { error: "User not found" };
-  } 
+    throw new BadRequestError("User not found");
+  }
   return users.splice(userIndex, 1);
+}
+
+export function getUserByQuery(query: getUserQuery) {
+  const { q } = query;
+  if (q) {
+    return users.filter(({ name }) => name === q);
+  }
+  return users;
 }
