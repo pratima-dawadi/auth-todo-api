@@ -1,7 +1,7 @@
 import { BadRequestError } from "../error/BadRequestError";
 import { getUserQuery, User } from "../interfaces/user.interfaces";
 
-const users: User[] = [
+export const users: User[] = [
   {
     name: "abcd",
     email: "abcd@gmail.com",
