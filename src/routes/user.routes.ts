@@ -17,22 +17,22 @@ import {
 
 const router = express();
 
-router.get("/", authenticate, authorize("admin"), getUsers);
+router.get("/", authenticate, authorize("get.users"), getUsers);
 
 router.get(
   "/query",
   authenticate,
-  authorize("admin"),
+  authorize("get.userByQuery"),
   validateReqBody(getUserQuerySchema),
   getUserByQuery
 );
 
-router.get("/:id", authenticate, authorize("admin"), getUserById);
+router.get("/:id", authenticate, authorize("get.usersById"), getUserById);
 
 router.post(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("create.users"),
   validateReqBody(createUserBodySchema),
   createUser
 );
@@ -40,11 +40,11 @@ router.post(
 router.put(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("update.users"),
   validateReqBody(updateUserBodySchema),
   updateUser
 );
 
-router.delete("/:id", authenticate, authorize("admin"), deleteUser);
+router.delete("/:id", authenticate, authorize("delete.users"), deleteUser);
 
 export default router;

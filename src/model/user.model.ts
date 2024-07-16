@@ -6,7 +6,18 @@ export const users: User[] = [
     name: "abcd",
     email: "abcd@gmail.com",
     password: "$2b$10$sGjlIiRRwWY7B.0zietgNuY194/lo61u42U/CGyZr66sUS16wgr5m",
-    permission: ["admin"],
+    permission: [
+      "get.users",
+      "create.users",
+      "update.users",
+      "delete.users",
+      "get.usersByQuery",
+      "get.usersById",
+      "get.todos",
+      "create.todos",
+      "update.todos",
+      "delete.todos",
+    ],
     id: "1",
   },
 ];
@@ -28,7 +39,13 @@ export function getUserById(id: string) {
 export function createUser(user: User) {
   return users.push({
     ...user,
-    permission: ["user"],
+    permission: [
+      "get.todos",
+      "create.todos",
+      "update.todos",
+      "delete.todos",
+      "get.todosById",
+    ],
     id: `${users.length + 1}`,
   });
 }

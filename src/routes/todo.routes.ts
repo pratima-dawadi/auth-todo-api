@@ -15,13 +15,14 @@ import {
 
 const router = express();
 
-router.get("/", authenticate, authorize("admin" || "user"), getTodos);
+router.get("/", authenticate, authorize("get.todos"), getTodos);
 
-router.get("/:id", authenticate, getTodosById);
+router.get("/:id", authenticate, authorize("get.todosById"), getTodosById);
 
 router.post(
   "/",
   authenticate,
+  authorize("create.todos"),
   validateReqBody(createTodoBodySchema),
   postTodos
 );
@@ -29,10 +30,11 @@ router.post(
 router.put(
   "/:id",
   authenticate,
+  authorize("update.todos"),
   validateReqBody(updateTodoBodySchema),
   putTodos
 );
 
-router.delete("/:id", authenticate, deleteTodos);
+router.delete("/:id", authenticate, authorize("delete.todos"), deleteTodos);
 
 export default router;
