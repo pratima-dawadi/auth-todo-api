@@ -17,7 +17,7 @@ const router = express();
 
 router.get("/", authenticate, authorize("get.todos"), getTodos);
 
-router.get("/:id", authenticate, authorize("get.todosById"), getTodosById);
+router.get("/:id", authenticate, authorize("get.todos"), getTodosById);
 
 router.post(
   "/",

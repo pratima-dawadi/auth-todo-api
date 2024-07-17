@@ -26,7 +26,7 @@ export function getUserById(id: string) {
 export async function createUser(user: User) {
   const password = await bcrypt.hash(user.password, 10);
   user.password = password;
-  UserModel.createUser(user);
+  UserModel.UserModel.createUser(user);
   return user;
 }
 
@@ -35,8 +35,9 @@ export async function createUser(user: User) {
  * @param {getUserQuery} query - getUserQuery
  * @returns Return a list of users based on the query.
  */
-export function getUsers(query: getUserQuery) {
-  return UserModel.getUsers(query);
+export async function getUsers(query: getUserQuery) {
+  const data = await UserModel.UserModel.getallUsers(query);
+  return data;
 }
 
 /**
@@ -49,16 +50,17 @@ export function getUserByEmail(email: string) {
   return data;
 }
 
-export function updateUser(id: string, body: User) {
-  const data = UserModel.updateUser(id, body);
+export async function updateUser(id: string, body: User) {
+  const data = await UserModel.UserModel.updateUser(id, body);
   return data;
 }
 
-export function deleteUser(id: string) {
-  const data = UserModel.deleteUser(id);
+export async function deleteUser(id: string) {
+  const data = await UserModel.UserModel.deleteUsers(id);
   return data;
 }
 
-export function getUserByQuery(query: getUserQuery) {
-  return UserModel.getUserByQuery(query);
+export async function getUserByQuery(query: getUserQuery) {
+  const data = await UserModel.UserModel.getUsers(query);
+  return data;
 }

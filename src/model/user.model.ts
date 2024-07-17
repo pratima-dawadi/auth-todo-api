@@ -1,5 +1,81 @@
 import { BadRequestError } from "../error/BadRequestError";
 import { getUserQuery, User } from "../interfaces/user.interfaces";
+import { BaseModel } from "./base.model";
+
+export class UserModel extends BaseModel {
+  static async createUser(user: User) {
+    const userToCreate = {
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    };
+
+    await this.queryBuilder().insert(userToCreate).into("users");
+  }
+
+  static async updateUser(id: string, user: User) {
+    const userToUpdate = {
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      updatedAt: new Date(),
+    };
+    const query = this.queryBuilder()
+      .update(userToUpdate)
+      .into("users")
+      .where({ id });
+
+    if (query) {
+      const resultQuery = this.queryBuilder()
+        .select("id", "email", "password")
+        .table("users")
+        .where({ id });
+      const data = await resultQuery;
+      console.log(`updated data:${data}`);
+      return data;
+    }
+  }
+
+  static async getUsers(filter: getUserQuery) {
+    const { q } = filter;
+    const query = this.queryBuilder()
+      .select("id", "name", "email")
+      .table("users");
+    if (q) {
+      query.whereLike("name", `%${q}%`);
+    }
+    const user = await query;
+    return user;
+  }
+  static async count(filter: getUserQuery) {
+    const { q } = filter;
+    const query = this.queryBuilder().count("*").table("users").first();
+    if (q) {
+      query.whereLike("name", `%${q}%`);
+    }
+    const user = await query;
+    return user;
+  }
+
+  static async getallUsers(filter: getUserQuery) {
+    const query = this.queryBuilder().select("*").table("users");
+    const user = await query;
+    return user;
+  }
+
+  static async deleteUsers(id: string) {
+    const query = this.queryBuilder().delete().table("users").where({ id: id });
+    if (query) {
+      const resultQuery = this.queryBuilder()
+        .select("id", "email", "password")
+        .table("users")
+        .where({ id });
+      const data = await resultQuery;
+      console.log(`updated data:${data}`);
+      return data;
+    }
+  }
+}
 
 export const users: User[] = [
   {
@@ -11,7 +87,7 @@ export const users: User[] = [
       "create.users",
       "update.users",
       "delete.users",
-      "get.usersByQuery",
+      "get.userByQuery",
       "get.usersById",
       "get.todos",
       "create.todos",

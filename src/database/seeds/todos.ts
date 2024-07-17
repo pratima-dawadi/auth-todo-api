@@ -17,13 +17,13 @@ export function seed(knex: Knex): Promise<void> {
           title: "First Todo",
           description: "This is the first todo",
           status: "completed",
-          user_id: "3",
+          user_id: "1",
         },
         {
           title: "Second Todo",
           description: "This is the second todo",
           status: "incomplete",
-          user_id: "3",
+          user_id: "1",
         },
       ]);
     });

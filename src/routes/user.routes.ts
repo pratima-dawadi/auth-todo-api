@@ -22,7 +22,7 @@ router.get("/", authenticate, authorize("get.users"), getUsers);
 router.get(
   "/query",
   authenticate,
-  authorize("get.userByQuery"),
+  authorize("get.users"),
   validateReqBody(getUserQuerySchema),
   getUserByQuery
 );

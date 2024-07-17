@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
 import { listTodos } from "../model/todo.model";
 import loggerWithNameSpace from "../utils/logger";
+import * as TodoModel from "../model/todo.model";
 
 const logger = loggerWithNameSpace("TodoController");
 
@@ -20,10 +21,14 @@ import { ForbiddenError } from "../error/ForbiddenError";
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getTodos(req: Request, res: Response, next: NextFunction) {
+export async function getTodos(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const user_id = req.user!.id;
-    const data = listTodos(user_id);
+    const data = await TodoModel.TodoModel.getTodos(user_id);
     if (!data) {
       throw new BadRequestError("No todos found for this user");
     }
@@ -38,11 +43,15 @@ export function getTodos(req: Request, res: Response, next: NextFunction) {
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getTodosById(req: Request, res: Response, next: NextFunction) {
+export async function getTodosById(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     const user_id = req.user!.id;
-    const data = checkId(id, user_id);
+    const data = await checkId(id, user_id);
     if (!data) {
       throw new BadRequestError(`Todo with id ${id} not found`);
     }
@@ -107,11 +116,15 @@ export function putTodos(req: Request, res: Response, next: NextFunction) {
  * @param {Response} res - Response object
  * @returns Return an error message if the todo item is not found. Otherwise, it will delete the todo item and return a Json Response.
  */
-export function deleteTodos(req: Request, res: Response, next: NextFunction) {
+export async function deleteTodos(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     const user_id = req.user!.id;
-    const deletedTodo = removeTodos(Number(id), user_id);
+    const deletedTodo = await removeTodos(Number(id), user_id);
     if (!deletedTodo) {
       throw new BadRequestError(`Todo with id ${id} not found`);
     }

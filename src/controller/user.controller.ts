@@ -11,12 +11,13 @@ const logger = loggerWithNameSpace("UserController");
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getUsers(
+export async function getUsers(
   req: Request<any, any, any, getUserQuery>,
   res: Response
 ) {
   const { query } = req;
-  const data = UserService.getUsers(query);
+  const data = await UserService.getUsers(query);
+  console.log(`data on controller :${data}`);
   res.json(data);
 }
 
@@ -70,11 +71,15 @@ export async function createUser(
   }
 }
 
-export function updateUser(req: Request, res: Response, next: NextFunction) {
+export async function updateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     const { body } = req;
-    const data = UserService.updateUser(id, body);
+    const data = await UserService.updateUser(id, body);
     if (!data) {
       throw new BadRequestError("User not found");
     }
@@ -85,10 +90,10 @@ export function updateUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export function deleteUser(req: Request, res: Response, next: NextFunction) {
+export async function deleteUser(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
-    const data = UserService.deleteUser(id);
+    const data = await UserService.deleteUser(id);
     if (!data) {
       throw new BadRequestError("User not found");
     }
@@ -99,14 +104,14 @@ export function deleteUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export function getUserByQuery(
+export async function getUserByQuery(
   req: Request<any, any, any, getUserQuery>,
   res: Response,
   next: NextFunction
 ) {
   try {
     const { query } = req;
-    const data = UserService.getUserByQuery(query);
+    const data = await UserService.getUserByQuery(query);
     if (!data) {
       throw new BadRequestError("User not found");
     }

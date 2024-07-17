@@ -1,5 +1,79 @@
 import { todo } from "node:test";
 import { ITodos } from "../interfaces/todo.interfaces";
+import { BaseModel } from "./base.model";
+
+export class TodoModel extends BaseModel {
+  static async createTodo(todo: ITodos, userid: string) {
+    const todoToCreate = {
+      title: todo.name,
+      description: todo.description,
+      status: todo.status,
+      userId: userid,
+    };
+    await this.queryBuilder().insert(todoToCreate).into("todos");
+  }
+
+  static async updateTodo(id: number, todo: ITodos, userId: string) {
+    const todoToUpdate = {
+      title: todo.name,
+      description: todo.description,
+      status: todo.status,
+      userId: +userId,
+      updatedAt: new Date(),
+    };
+
+    const updateQuery = this.queryBuilder()
+      .update(todoToUpdate)
+      .into("todos")
+      .where({ id });
+
+    const updateResult = await updateQuery;
+
+    if (updateResult) {
+      const resultQuery = this.queryBuilder()
+        .select("title", "description", "status")
+        .table("todos")
+        .where({ id });
+      const data = await resultQuery;
+      return data;
+    }
+  }
+
+  static async deleteTodo(id: number, userId: string) {
+    const delUserId = +userId;
+    const query = this.queryBuilder()
+      .delete()
+      .table("todos")
+      .where({ id: id, user_id: delUserId });
+
+    if (query) {
+      const resultQuery = this.queryBuilder()
+        .select("title", "description", "status")
+        .table("todos")
+        .where({ id });
+      const data = await resultQuery;
+      return data;
+    }
+  }
+
+  static async getTodos(userId: string) {
+    const query = this.queryBuilder()
+      .select("*")
+      .table("todos")
+      .where({ user_id: +userId });
+    const todos = await query;
+    return todos;
+  }
+
+  static async getTodosById(id: string, userId: string) {
+    const query = this.queryBuilder()
+      .select("*")
+      .table("todos")
+      .where({ id: +id, user_id: +userId });
+    const todos = await query;
+    return todos;
+  }
+}
 
 const todolist = [
   {

@@ -9,8 +9,8 @@ import * as TodoModel from "../model/todo.model";
  * @param {string} user_id - User id
  * @returns Return an error message if the todo with the id is not found. Otherwise, it will return the todo id.
  */
-export function checkId(id: string, user_id: string) {
-  const todoId = getIdFromModel(id, user_id);
+export async function checkId(id: string, user_id: string) {
+  const todoId = await TodoModel.TodoModel.getTodosById(id, user_id);
 
   if (!todoId) {
     throw new ForbiddenError(`Todo with id ${id} not found`);
@@ -25,7 +25,7 @@ export function checkId(id: string, user_id: string) {
  * @param {string} user_id - User id
  */
 export function createTodos(body: ITodos, user_id: string) {
-  const createTodo = TodoModel.createTodos(body, user_id);
+  const createTodo = TodoModel.TodoModel.createTodo(body, user_id);
   return createTodo;
 }
 
@@ -37,7 +37,7 @@ export function createTodos(body: ITodos, user_id: string) {
  * @returns Return an error message if the task does not belong to the user or is invalid. Otherwise, it will return the updated todo item.
  */
 export function updateTodos(id: string, body: ITodos, user_id: string) {
-  const updatedToDo = TodoModel.updateTodos(Number(id), body, user_id);
+  const updatedToDo = TodoModel.TodoModel.updateTodo(Number(id), body, user_id);
   if (updatedToDo.hasOwnProperty("error")) {
     throw new ForbiddenError("Task cannot be updated");
   }
@@ -50,8 +50,8 @@ export function updateTodos(id: string, body: ITodos, user_id: string) {
  * @param {string} user_id - user id
  * @returns Return an error message if the task does not belong to the user or is invalid. Otherwise, it will return the deleted todo item.
  */
-export function removeTodos(id: number, user_id: string) {
-  const deletedTodo = TodoModel.deleteTodo(id, user_id);
+export async function removeTodos(id: number, user_id: string) {
+  const deletedTodo = await TodoModel.TodoModel.deleteTodo(id, user_id);
   if (deletedTodo.hasOwnProperty("error")) {
     throw new ForbiddenError("Task does not belong to the user or is invalid");
   }
