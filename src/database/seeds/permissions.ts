@@ -23,11 +23,28 @@ export function seed(knex: Knex): Promise<void> {
         },
         {
           user_id: 1,
-          permission: "delete.todos",
+          permission: "delete.users",
+        },
+        {
+          user_id: 1,
+          permission: "create.users",
+        },
+
+        {
+          user_id: 1,
+          permission: "get.todos",
         },
         {
           user_id: 1,
           permission: "create.todos",
+        },
+        {
+          user_id: 1,
+          permission: "update.todos",
+        },
+        {
+          user_id: 1,
+          permission: "delete.todos",
         },
       ]);
     });

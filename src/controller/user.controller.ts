@@ -17,7 +17,6 @@ export async function getUsers(
 ) {
   const { query } = req;
   const data = await UserService.getUsers(query);
-  console.log(`data on controller :${data}`);
   res.json(data);
 }
 

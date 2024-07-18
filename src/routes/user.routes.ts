@@ -27,7 +27,7 @@ router.get(
   getUserByQuery
 );
 
-router.get("/:id", authenticate, authorize("get.usersById"), getUserById);
+router.get("/:id", authenticate, authorize("get.users"), getUserById);
 
 router.post(
   "/",

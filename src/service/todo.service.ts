@@ -1,6 +1,5 @@
 import { ForbiddenError } from "../error/ForbiddenError";
 import { ITodos } from "../interfaces/todo.interfaces";
-import { getIdFromModel } from "../model/todo.model";
 import * as TodoModel from "../model/todo.model";
 
 /**

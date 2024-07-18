@@ -10,7 +10,7 @@ import bcrypt from "bcrypt";
  * @returns Return an error message if the user is not found. Otherwise, it will return the user data.
  */
 export function getUserById(id: string) {
-  const data = UserModel.getUserById(id);
+  const data = UserModel.UserModel.getUserById(id);
 
   if (!data) {
     throw new BadRequestError("User not found");
@@ -45,7 +45,7 @@ export function getUsers(query: getUserQuery) {
  * @returns Return the user data based on the email address.
  */
 export function getUserByEmail(email: string) {
-  return UserModel.getUserByEmail(email);
+  return UserModel.UserModel.getUserByEmail(email);
 }
 
 export function updateUser(id: string, body: User) {

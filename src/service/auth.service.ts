@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 
 import { User } from "../interfaces/user.interfaces";
-import { getUserByEmail } from "../model/user.model";
+import { UserModel } from "../model/user.model";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import config from "../config";
 import { error } from "console";
@@ -14,7 +14,7 @@ import { BadRequestError } from "../error/BadRequestError";
  * @returns Return an error message if the email or password is invalid. Otherwise, it will generate an access token and a refresh token.
  */
 export async function login(body: Pick<User, "email" | "password">) {
-  const existingUser = getUserByEmail(body.email);
+  const existingUser = await UserModel.getUserByEmail(body.email);
   if (!existingUser) {
     throw new BadRequestError("Invalid email or password");
   }

@@ -1,6 +1,5 @@
 import { NextFunction, Response } from "express";
 import { Request } from "../interfaces/auth.interfaces";
-import { listTodos } from "../model/todo.model";
 import loggerWithNameSpace from "../utils/logger";
 import * as TodoModel from "../model/todo.model";
 

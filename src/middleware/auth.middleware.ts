@@ -4,6 +4,7 @@ import { Request } from "../interfaces/auth.interfaces";
 import config from "../config";
 import { User } from "../interfaces/user.interfaces";
 import { UnauthenthicatedError } from "../error/UnauthenticatedError";
+import { UserModel } from "../model/user.model";
 
 /**
  * The function `auth` checks for a valid Bearer token in the request headers for authentication.
@@ -38,11 +39,21 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 }
 
 export function authorize(permissions: string) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user!;
-    if (!user.permission.includes(permissions)) {
-      next(new UnauthenthicatedError("Permission denied"));
+    try {
+      const userPermissions = await UserModel.getUserPermissions(user.id);
+      const permissionsArray = userPermissions.map(
+        (perm: { permission: string }) => perm.permission
+      );
+
+      if (!permissionsArray.includes(permissions)) {
+        return next(new UnauthenthicatedError("Permission denied"));
+      }
+
+      next();
+    } catch (error) {
+      return next(new Error("Failed to authorize user"));
     }
-    next();
   };
 }

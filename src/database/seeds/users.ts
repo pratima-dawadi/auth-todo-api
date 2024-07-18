@@ -14,9 +14,10 @@ export function seed(knex: Knex): Promise<void> {
     .then(() => {
       return knex(TABLE_NAME).insert([
         {
-          name: "test-user",
-          email: "test@gmail.com",
-          password: "Test@1234",
+          name: "admin",
+          email: "admin@gmail.com",
+          password:
+            "$2b$10$zI1TAgx2pBlmEHL3fAAbLuDpJLvn1SyJ70I0na/p4.WFO.EAw7pUe",
         },
       ]);
     });
