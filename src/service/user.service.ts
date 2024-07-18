@@ -35,9 +35,8 @@ export async function createUser(user: User) {
  * @param {getUserQuery} query - getUserQuery
  * @returns Return a list of users based on the query.
  */
-export async function getUsers(query: getUserQuery) {
-  const data = await UserModel.UserModel.getallUsers(query);
-  return data;
+export function getUsers(query: getUserQuery) {
+  return UserModel.UserModel.getallUsers(query);
 }
 
 /**
@@ -46,21 +45,17 @@ export async function getUsers(query: getUserQuery) {
  * @returns Return the user data based on the email address.
  */
 export function getUserByEmail(email: string) {
-  const data = UserModel.getUserByEmail(email);
-  return data;
+  return UserModel.getUserByEmail(email);
 }
 
-export async function updateUser(id: string, body: User) {
-  const data = await UserModel.UserModel.updateUser(id, body);
-  return data;
+export function updateUser(id: string, body: User) {
+  return UserModel.UserModel.updateUser(id, body);
 }
 
-export async function deleteUser(id: string) {
-  const data = await UserModel.UserModel.deleteUsers(id);
-  return data;
+export function deleteUser(id: string) {
+  return UserModel.UserModel.deleteUsers(id);
 }
 
-export async function getUserByQuery(query: getUserQuery) {
-  const data = await UserModel.UserModel.getUsers(query);
-  return data;
+export function getUserByQuery(query: getUserQuery) {
+  return UserModel.UserModel.getUsers(query);
 }

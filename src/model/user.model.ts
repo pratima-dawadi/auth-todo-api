@@ -10,7 +10,26 @@ export class UserModel extends BaseModel {
       password: user.password,
     };
 
-    await this.queryBuilder().insert(userToCreate).into("users");
+    const query = await this.queryBuilder().insert(userToCreate).into("users");
+
+    if (query) {
+      const permissions = [
+        "get.todos",
+        "create.todos",
+        "update.todos",
+        "delete.todos",
+      ];
+      const userId = await this.queryBuilder()
+        .select("id")
+        .table("users")
+        .where("email", user.email)
+        .first();
+      for (const permission of permissions) {
+        await this.queryBuilder()
+          .insert({ user_id: userId.id, permission: permission })
+          .table("permissions");
+      }
+    }
   }
 
   static async updateUser(id: string, user: User) {
@@ -65,15 +84,18 @@ export class UserModel extends BaseModel {
 
   static async deleteUsers(id: string) {
     const query = this.queryBuilder().delete().table("users").where({ id: id });
-    if (query) {
-      const resultQuery = this.queryBuilder()
-        .select("id", "email", "password")
-        .table("users")
-        .where({ id });
-      const data = await resultQuery;
-      console.log(`updated data:${data}`);
-      return data;
-    }
+    const data = await query;
+    return data;
+  }
+
+  static async getPermissions(id: string) {
+    const query = this.queryBuilder()
+      .select("permission")
+      .table("permissions")
+      .where({ user_id: +id });
+    const data = await query;
+    console.log(`data in user model ${data}`);
+    return data;
   }
 }
 

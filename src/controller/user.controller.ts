@@ -27,10 +27,14 @@ export async function getUsers(
  * @param {Response} res - Response object
  * @returns Return a user object if found
  */
-export function getUserById(req: Request, res: Response, next: NextFunction) {
+export async function getUserById(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
-    const data = UserService.getUserById(id);
+    const data = await UserService.getUserById(id);
     if (data.hasOwnProperty("error")) {
       throw new BadRequestError("User not found");
     }
@@ -90,7 +94,11 @@ export async function updateUser(
   }
 }
 
-export async function deleteUser(req: Request, res: Response, next: NextFunction) {
+export async function deleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     const data = await UserService.deleteUser(id);
