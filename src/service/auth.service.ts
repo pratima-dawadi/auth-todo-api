@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
 
 import { User } from "../interfaces/user.interfaces";
-import { getUserByEmail } from "../model/user.model";
+import { UserModel } from "../model/user.model";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import config from "../config";
 import { error } from "console";
+import { permission } from "process";
+import { BadRequestError } from "../error/BadRequestError";
 
 /**
  * The function `login` hverify credentials and generate access and refresh tokens upon successful login.
@@ -12,11 +14,9 @@ import { error } from "console";
  * @returns Return an error message if the email or password is invalid. Otherwise, it will generate an access token and a refresh token.
  */
 export async function login(body: Pick<User, "email" | "password">) {
-  const existingUser = getUserByEmail(body.email);
+  const existingUser = await UserModel.getUserByEmail(body.email);
   if (!existingUser) {
-    return {
-      error: "Invalid email",
-    };
+    throw new BadRequestError("Invalid email or password");
   }
 
   const isValidPassword = await bcrypt.compare(
@@ -25,15 +25,14 @@ export async function login(body: Pick<User, "email" | "password">) {
   );
 
   if (!isValidPassword) {
-    return {
-      error: "Invalid password",
-    };
+    throw new BadRequestError("Invalid password");
   }
 
   const payload = {
     id: existingUser.id,
     name: existingUser.name,
     email: existingUser.email,
+    permission: existingUser.permission,
   };
 
   const acessToken = sign(payload, config.jwt.secret!, {
@@ -56,16 +55,10 @@ export async function login(body: Pick<User, "email" | "password">) {
  * @returns Return an error message if the refresh token is invalid. Otherwise, it will generate a new access token.
  */
 export function refreshToken(oldRefreshToken: string) {
-  if (!oldRefreshToken) {
-    return {
-      error: "Refresh token is required",
-    };
-  }
-
   const payload = verify(oldRefreshToken, config.jwt.secret!) as JwtPayload;
 
   if (!payload || !payload.id || !payload.email || !payload.name) {
-    return { error: "Invalid refresh token" };
+    throw new BadRequestError("Invalid refresh token");
   }
 
   const newPayload: Pick<User, "id" | "name" | "email"> = {

@@ -1,18 +1,22 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as UserService from "../service/user.service";
 import { getUserQuery } from "../interfaces/user.interfaces";
+import loggerWithNameSpace from "../utils/logger";
+import { BadRequestError } from "../error/BadRequestError";
+
+const logger = loggerWithNameSpace("UserController");
 
 /**
  * the function `getUsers` retrieves all users.
  * @param {Request} req - Request object
  * @param {Response} res - Response object
  */
-export function getUsers(
+export async function getUsers(
   req: Request<any, any, any, getUserQuery>,
   res: Response
 ) {
   const { query } = req;
-  const data = UserService.getUsers(query);
+  const data = await UserService.getUsers(query);
   res.json(data);
 }
 
@@ -22,10 +26,21 @@ export function getUsers(
  * @param {Response} res - Response object
  * @returns Return a user object if found
  */
-export function getUserById(req: Request, res: Response) {
-  const { id } = req.params;
-  const data = UserService.getUserById(id);
-  res.json(data);
+export async function getUserById(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const data = await UserService.getUserById(id);
+    if (data.hasOwnProperty("error")) {
+      throw new BadRequestError("User not found");
+    }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**
@@ -34,24 +49,81 @@ export function getUserById(req: Request, res: Response) {
  * @param {Response} res - Response object
  * @returns  Return an error message if required fields are missing. Otherwise, it will create a new user using the provided data, and return a Json Response.
  */
-export async function createUser(req: Request, res: Response) {
-  const { body } = req;
+export async function createUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { body } = req;
 
-  if (!body.name || !body.email || !body.password) {
-    res.status(400).json({
-      error: "Missing required fields",
-    });
-    return;
+    if (!body.name || !body.email || !body.password) {
+      throw new BadRequestError("Missing required fields");
+    }
+
+    const userExists = UserService.getUserByEmail(body.email);
+    if (userExists) {
+      throw new BadRequestError("User already exists");
+    }
+
+    const data = await UserService.createUser(body);
+    logger.info(`User created with email ${body.email}`);
+    res.json(data);
+  } catch (error) {
+    next(error);
   }
+}
 
-  const userExists = UserService.getUserByEmail(body.email);
-  if (userExists) {
-    res.status(400).json({
-      error: "User with email already exists",
-    });
-    return;
+export async function updateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const { body } = req;
+    const data = await UserService.updateUser(id, body);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    logger.info(`User updated with id ${id}`);
+    res.send(`Updated user: ${JSON.stringify(data)}`);
+  } catch (error) {
+    next(error);
   }
+}
 
-  const data = await UserService.createUser(body);
-  res.json(data);
+export async function deleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const data = await UserService.deleteUser(id);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    logger.info(`User deleted with id ${id}`);
+    res.send(`Deleted user: ${JSON.stringify(data)}`);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getUserByQuery(
+  req: Request<any, any, any, getUserQuery>,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { query } = req;
+    const data = await UserService.getUserByQuery(query);
+    if (!data) {
+      throw new BadRequestError("User not found");
+    }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
 }

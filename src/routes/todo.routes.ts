@@ -6,21 +6,35 @@ import {
   putTodos,
   getTodosById,
 } from "../controller/todo.controller";
-import { auth } from "../middleware/auth.middleware";
-import { authenticateToken } from "../middleware/user_id.middleware";
+import { authenticate, authorize } from "../middleware/auth.middleware";
+import { validateReqBody } from "../middleware/validator.middleware";
+import {
+  createTodoBodySchema,
+  updateTodoBodySchema,
+} from "../schema/todo.schema";
 
 const router = express();
 
-router.use(authenticateToken);
+router.get("/", authenticate, authorize("get.todos"), getTodos);
 
-router.get("/", auth, getTodos);
+router.get("/:id", authenticate, authorize("get.todos"), getTodosById);
 
-router.get("/:id", auth, getTodosById);
+router.post(
+  "/",
+  authenticate,
+  authorize("create.todos"),
+  validateReqBody(createTodoBodySchema),
+  postTodos
+);
 
-router.post("/", auth, postTodos);
+router.put(
+  "/:id",
+  authenticate,
+  authorize("update.todos"),
+  validateReqBody(updateTodoBodySchema),
+  putTodos
+);
 
-router.put("/:id", auth, putTodos);
-
-router.delete("/:id", auth, deleteTodos);
+router.delete("/:id", authenticate, authorize("delete.todos"), deleteTodos);
 
 export default router;

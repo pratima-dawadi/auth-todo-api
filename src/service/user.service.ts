@@ -1,5 +1,7 @@
 import { getUserQuery, User } from "../interfaces/user.interfaces";
 import * as UserModel from "../model/user.model";
+import { BadRequestError } from "../error/BadRequestError";
+import { ForbiddenError } from "../error/ForbiddenError";
 import bcrypt from "bcrypt";
 
 /**
@@ -8,12 +10,10 @@ import bcrypt from "bcrypt";
  * @returns Return an error message if the user is not found. Otherwise, it will return the user data.
  */
 export function getUserById(id: string) {
-  const data = UserModel.getUserById(id);
+  const data = UserModel.UserModel.getUserById(id);
 
   if (!data) {
-    return {
-      error: `User with id ${id} not found`,
-    };
+    throw new BadRequestError("User not found");
   }
   return data;
 }
@@ -26,7 +26,7 @@ export function getUserById(id: string) {
 export async function createUser(user: User) {
   const password = await bcrypt.hash(user.password, 10);
   user.password = password;
-  UserModel.createUser(user);
+  UserModel.UserModel.createUser(user);
   return user;
 }
 
@@ -36,7 +36,7 @@ export async function createUser(user: User) {
  * @returns Return a list of users based on the query.
  */
 export function getUsers(query: getUserQuery) {
-  return UserModel.getUsers(query);
+  return UserModel.UserModel.getallUsers(query);
 }
 
 /**
@@ -45,6 +45,17 @@ export function getUsers(query: getUserQuery) {
  * @returns Return the user data based on the email address.
  */
 export function getUserByEmail(email: string) {
-  const data = UserModel.getUserByEmail(email);
-  return data;
+  return UserModel.UserModel.getUserByEmail(email);
+}
+
+export function updateUser(id: string, body: User) {
+  return UserModel.UserModel.updateUser(id, body);
+}
+
+export function deleteUser(id: string) {
+  return UserModel.UserModel.deleteUsers(id);
+}
+
+export function getUserByQuery(query: getUserQuery) {
+  return UserModel.UserModel.getUsers(query);
 }
